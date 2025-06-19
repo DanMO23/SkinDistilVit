@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 model_type = DistilViTForImageClassification
 checkpoint_weights_dest = "../experiments/matryoshka/MDistilViT_12/checkpoint-5000"
 #checkpoint_weights_dest = "../experiments/DistilViT_full"
-ck_path = os.path.join(checkpoint_weights_dest,"cm1.pkl")
+ck_path = os.path.join(checkpoint_weights_dest,"cm.pkl")
 
 if __name__ == "__main__":
     import sys
@@ -50,7 +50,8 @@ def compute_matrix(model_type = DistilViTForImageClassification, checkpoint_weig
         ]
     )
 
-    full_dataset = ISICDataset("../ISIC2019/ISIC_2019_Training_GroundTruth.csv", "../ISIC2019/TrainInput", transform=train_transform)
+    full_dataset = ISICDataset("../dataset/ISIC_2019_Training_GroundTruth.csv", 
+                    "../dataset/ISIC_2019_Training_Input",  transform=train_transform)
     train_size = int(0.8 * len(full_dataset))
     valid_size = len(full_dataset) - train_size
 
@@ -71,7 +72,8 @@ def compute_matrix(model_type = DistilViTForImageClassification, checkpoint_weig
                             checkpoint_weights_dest,
                             num_labels = len(full_dataset.classes_names),
                             id2label = {str(i): c for i, c in enumerate(full_dataset.classes_names)},
-                            label2id = {c: str(i) for i, c in enumerate(full_dataset.classes_names)}
+                            label2id = {c: str(i) for i, c in enumerate(full_dataset.classes_names)},
+                            local_files_only=True
                         ).to("cuda")
     model.eval()
 
@@ -125,18 +127,18 @@ hmap = sns.heatmap(
 fig = hmap.get_figure()
 fig.savefig(os.path.join(checkpoint_weights_dest,"confmat.png"))
 
-y_preds = torch.tensor(np.concatenate([y_pred[None,...] for y_pred in y_preds]))
+y_preds = torch.tensor(y_preds)
 y_trues = torch.tensor(y_trues)
 
 print(y_preds.shape, y_trues.shape)
 
 import torchmetrics
 
-metric_acc = torchmetrics.Accuracy(task="multiclass", num_classes=8, average="weighted", top_k=1)
-metric_precision = torchmetrics.Precision(task = "multiclass", num_classes=8, average="weighted", top_k=1)
-metric_recall = torchmetrics.Recall(task = "multiclass", num_classes=8, average="weighted", top_k=1)
-metric_f1 = torchmetrics.F1Score(task = "multiclass", num_classes=8, average="weighted", top_k=1)
-metric_bacc = torchmetrics.Recall(task = "multiclass", num_classes=8, average="macro", top_k=1)
+metric_acc = torchmetrics.Accuracy(task="multiclass", num_classes=9, average="weighted", top_k=1)
+metric_precision = torchmetrics.Precision(task = "multiclass", num_classes=9, average="weighted", top_k=1)
+metric_recall = torchmetrics.Recall(task = "multiclass", num_classes=9, average="weighted", top_k=1)
+metric_f1 = torchmetrics.F1Score(task = "multiclass", num_classes=9, average="weighted", top_k=1)
+metric_bacc = torchmetrics.Recall(task = "multiclass", num_classes=9, average="macro", top_k=1)
 
 print(y_preds[:10])
 print(y_trues[:10])

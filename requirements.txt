@@ -1,0 +1,21 @@
+torch>=1.10
+torchvision
+torchmetrics
+pytorch-lightning
+transformers
+albumentations
+opencv-python
+scikit-learn
+pandas
+numpy
+matplotlib
+seaborn
+tqdm
+datasets
+tf-keras
+# Para compatibilidade com transformers e keras, evite keras>=3
+keras==2.11.0
+# Para salvar e carregar modelos
+pickle-mixin
+# Para garantir que o código funcione em ambientes headless
+Pillow

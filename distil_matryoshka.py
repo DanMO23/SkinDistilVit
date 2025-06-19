@@ -18,7 +18,8 @@ from albumentations.pytorch import ToTensorV2
 
 from data.dataset import ISICDataset
 
-from datasets import load_metric
+from evaluate import load as load_metric
+
 
 import os, sys
 os.chdir(sys.path[0])
@@ -53,11 +54,12 @@ val_transform = A.Compose(
     ]
 )
 
-full_dataset = ISICDataset("../ISIC2019/ISIC_2019_Training_GroundTruth.csv", 
-                    "../ISIC2019/TrainInput", 
-                    transform=train_transform,
+full_dataset = ISICDataset("../dataset/ISIC_2019_Training_GroundTruth.csv", 
+                    "../ISIC_2019_Training_Input", 
+                    transform=train_transform, 
                     val_transform=val_transform
                 )
+
 train_size = int(0.8 * len(full_dataset))
 valid_size = len(full_dataset) - train_size
 
@@ -114,7 +116,7 @@ KEEP_LAYERS = 12
 
 teacher_checkpoint =  f"../experiments/matryoshka/MDistilViT_{KEEP_LAYERS-1}"
 print("Teacher checkpoint: ", teacher_checkpoint)
-teacher = DistilViTForImageClassification.from_pretrained(teacher_checkpoint)
+teacher = DistilViTForImageClassification.from_pretrained(teacher_checkpoint, local_files_only=True)
 
 student_checkpoint = f"../experiments/matryoshka/MDistilViT_{KEEP_LAYERS}_untrained"
 print("Student checkpoint: ", student_checkpoint)

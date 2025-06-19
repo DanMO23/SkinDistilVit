@@ -13,7 +13,8 @@ from albumentations.pytorch import ToTensorV2
 
 from data.dataset import ISICDataset
 
-from datasets import load_metric
+from evaluate import load as load_metric
+from model.distilvit.configuration_distilvit import DistilViTConfig
 
 import os, sys
 os.chdir(sys.path[0])
@@ -47,9 +48,9 @@ valid_transform = A.Compose(
     ]
 )
 
-full_dataset = ISICDataset("../ISIC2019/ISIC_2019_Training_GroundTruth.csv", 
-                    "../ISIC2019/TrainInput", 
-                    transform=train_transform,
+full_dataset = ISICDataset("../dataset/ISIC_2019_Training_GroundTruth.csv", 
+                    "../ISIC_2019_Training_Input", 
+                    transform=train_transform, 
                     val_transform=valid_transform
                 )
 train_size = int(0.8 * len(full_dataset))
@@ -111,12 +112,14 @@ def collate_fn(batch):
 #             label2id = {c: str(i) for i, c in enumerate(full_dataset.classes_names)}
 #         ))
 
-model = DistilViTForImageClassification.from_pretrained(
-            '../experiments/matryoshka/MDistilViT_8',
-            num_labels = len(full_dataset.classes_names),
-            id2label = {str(i): c for i, c in enumerate(full_dataset.classes_names)},
-            label2id = {c: str(i) for i, c in enumerate(full_dataset.classes_names)}
-        )
+
+
+config = DistilViTConfig(
+    num_labels = len(full_dataset.classes_names),
+    id2label = {str(i): c for i, c in enumerate(full_dataset.classes_names)},
+    label2id = {c: str(i) for i, c in enumerate(full_dataset.classes_names)}
+)
+model = DistilViTForImageClassification(config)
 
 training_args = TrainingArguments(
     output_dir = "../experiments/DistilViT_trained_3",
@@ -125,15 +128,14 @@ training_args = TrainingArguments(
     evaluation_strategy="steps",
     num_train_epochs=EPOCHS,
     save_steps=1000,
-    eval_steps=1000,
-    logging_steps=100,
+    logging_steps=1000,
     learning_rate=2e-4,
     save_total_limit=2,
     remove_unused_columns=True,
     push_to_hub=False,
     report_to="none",
     load_best_model_at_end=True,
-    metric_for_best_model="recall"
+    metric_for_best_model="eval_recall"
 )
 
 trainer = Trainer(

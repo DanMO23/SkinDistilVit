@@ -62,7 +62,7 @@ if __name__ == '__main__':
     import os, sys
     import matplotlib.pyplot as plt
     os.chdir( sys.path[0])
-    train_data = ISICDataset("../../ISIC2019/ISIC_2019_Training_GroundTruth.csv", "../../ISIC2019/TrainInput", None)
+    train_data = ISICDataset("../../dataset/ISIC_2019_Training_GroundTruth.csv", "../../ISIC_2019_Training_Input", None)
     data = pd.DataFrame(train_data.labels, columns=["label"])
 
     import json
@@ -77,7 +77,8 @@ if __name__ == '__main__':
     with open("classes_distribution.json","w") as f:
         json.dump(labels, f, indent=1)
 
-    p = sns.countplot( data = data, x = 'label')
-    p.set_xticklabels(train_data.classes_names[:-1])
-    #p.bar_label(container=p.containers[0], labels=train_data.classes_names)
+    
+    p = sns.countplot(data=data, x='label')
+    p.set_xticks(range(len(train_data.classes_names)))
+    p.set_xticklabels(train_data.classes_names)
     plt.savefig("classes_distribution.png", transparent=True)
